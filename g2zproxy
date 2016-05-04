@@ -43,6 +43,7 @@ class G2ZProxy(object):
                 graphite_url='http://localhost',
                 threads=1,
                 application=None,
+                time_from='-5min',
                 aggregation_function='{metric}'):
 
         self.cn = self.__class__.__name__
@@ -51,7 +52,7 @@ class G2ZProxy(object):
         self.pattern = pattern
         self.application = application
         self.zabbix_url = zabbix_url
-        self.graphite_url = graphite_url + '/render?from=-5minutes&rawData=true&target={req}&format=json'
+        self.graphite_url = graphite_url + '/render?from=' + time_from + '&rawData=true&target={req}&format=json'
         self.aggregation_function = aggregation_function
         self.zapi = ZabbixAPI(self.zabbix_url, user=zabbix_user, password=zabbix_pass)
         self.threads = threads
@@ -240,6 +241,9 @@ if __name__ == '__main__':
             help='Aggregation function')
     argparser.add_argument('-A', '--application', default=None,
             help='Zabbix application to get metrics for')
+    argparser.add_argument('-f', '--from', dest='time_from', default='-5min',
+            help="Beginning of time period for Graphite. Supply as quoted string \
+            with leading space (e.g. ' -30min') due to Python bug #9334")
 
     args = argparser.parse_args()
 
@@ -254,4 +258,5 @@ if __name__ == '__main__':
             graphite_url = args.graphite_url,
             threads = args.threads,
             application = args.application,
+            time_from = args.time_from.lstrip(), # See help for time_from and Python issue #9334
             aggregation_function = args.aggregation_function)
