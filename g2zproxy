@@ -42,12 +42,14 @@ class G2ZProxy(object):
                 zabbix_pass='zabbix',
                 graphite_url='http://localhost',
                 threads=1,
+                application=None,
                 aggregation_function='{metric}'):
 
         self.cn = self.__class__.__name__
 
         # Takes needed metric from zabbix
         self.pattern = pattern
+        self.application = application
         self.zabbix_url = zabbix_url
         self.graphite_url = graphite_url + '/render?from=-5minutes&rawData=true&target={req}&format=json'
         self.aggregation_function = aggregation_function
@@ -86,6 +88,7 @@ class G2ZProxy(object):
         if self.zapi:
             metrics = self.zapi.item.get(
                 search = { 'key_': self.pattern },
+                application = self.application,
                 searchWildcardsEnabled = True,
                 monitored = True,
                 output = ['key_', 'hostid'])
@@ -235,6 +238,8 @@ if __name__ == '__main__':
             help='Number threads to get simultaneously requests to Graphite')
     argparser.add_argument('-a', '--aggregation-function', default='timeShift(movingAverage({metric}, "5min"), "+150sec")',
             help='Aggregation function')
+    argparser.add_argument('-A', '--application', default=None,
+            help='Zabbix application to get metrics for')
 
     args = argparser.parse_args()
 
@@ -248,4 +253,5 @@ if __name__ == '__main__':
             zabbix_pass = args.zabbix_pass,
             graphite_url = args.graphite_url,
             threads = args.threads,
+            application = args.application,
             aggregation_function = args.aggregation_function)
