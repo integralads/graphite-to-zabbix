@@ -230,7 +230,7 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description="Graphite to Zabbix proxy",
             prog="g2zproxy")
 
-    argparser.add_argument('-v', '--version', action='version', version='%(prog)s 0.2')
+    argparser.add_argument('-v', '--version', action='version', version='%(prog)s 0.3.0')
     argparser.add_argument('-z', '--zabbix-url', default='http://localhost',
             help='Specify URL to Zabbix.')
     argparser.add_argument('-zu', '--zabbix-user', default='admin',
