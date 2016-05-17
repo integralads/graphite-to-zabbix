@@ -136,13 +136,16 @@ class G2ZProxy(object):
 
         result = None
 
-        params = map(lambda x: x.strip(), metric['metric'].split(';'))
-
-        if len(params) > 1:
-            req_metric = '{0}.{1}'.format(metric['host'], params[0])
-            req = params[1].format(metric=req_metric)
+        if '{host}' in metric['metric']:
+            req = metric['metric'].format(host = metric['host'])
         else:
-            req = '{host}.{metric}'
+            params = map(lambda x: x.strip(), metric['metric'].split(';'))
+
+            if len(params) > 1:
+                req_metric = '{0}.{1}'.format(metric['host'], params[0])
+                req = params[1].format(metric=req_metric)
+            else:
+                req = '{host}.{metric}'
 
         req = req.format(host=metric['host'], metric=metric['metric'])
         req = self.aggregation_function.format(metric=req)
@@ -184,8 +187,9 @@ class G2ZProxy(object):
                 logger.debug("{0}:_getGraphiteData(): filter(datapoints):{1}".format(self.__class__.__name__, datapoints))
 
                 if datapoints:
-                    # We are only interested in latest datapoint
-                    data = datapoints[-1]
+                    # We are only interested in latest datapoint, but latest datapoint may behave odd
+                    # depending on selected aggregation function, so we use [-2] as a workaround
+                    data = datapoints[-2]
                     # Update metric record
 		    logger.debug({'value': data[0], 'time': data[1] })
                     metric.update({ 'value': data[0], 'time': data[1] })
@@ -226,7 +230,7 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description="Graphite to Zabbix proxy",
             prog="g2zproxy")
 
-    argparser.add_argument('-v', '--version', action='version', version='%(prog)s 0.2')
+    argparser.add_argument('-v', '--version', action='version', version='%(prog)s 0.3.0')
     argparser.add_argument('-z', '--zabbix-url', default='http://localhost',
             help='Specify URL to Zabbix.')
     argparser.add_argument('-zu', '--zabbix-user', default='admin',
